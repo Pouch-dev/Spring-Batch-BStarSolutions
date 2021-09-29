@@ -11,8 +11,7 @@ import java.util.List;
 @Component
 public class DBWriter implements ItemWriter<UserManagement> {
 
-    @Autowired
-    UserRepository repository;
+    @Autowired UserRepository repository;
 
     @Override
     public void write(List<? extends UserManagement> users) throws Exception {

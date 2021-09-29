@@ -1,12 +1,15 @@
 package com.example.springbatch.config;
 
 import com.example.springbatch.model.UserManagement;
+import com.example.springbatch.respository.UserRepository;
+import com.example.springbatch.tasklet.DataCleanup;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
@@ -15,32 +18,58 @@ import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
 
 @Configuration
 @EnableBatchProcessing
 public class SpringBatchConfig {
 
+
+    @Bean("chunkJob")
+    @Primary
+    public Job chunkJob(JobBuilderFactory jobBuilderFactory,
+                        StepBuilderFactory stepBuilderFactory,
+                        ItemReader<UserManagement> itemReader,
+                        ItemProcessor<UserManagement, UserManagement> itemProcessor,
+                        ItemWriter<UserManagement> itemWriter){
+
+                Step chunkstep = stepBuilderFactory.get("ETL-file-load")
+                        .<UserManagement, UserManagement>chunk(100)
+                        .reader(itemReader)
+                        .processor(itemProcessor)
+                        .writer(itemWriter)
+                        .build();
+
+                return jobBuilderFactory.get("ETL-Load")
+                        .incrementer(new RunIdIncrementer())
+                        .start(chunkstep)
+                        .build();
+    }
+
+    //learn all step -> chunkStep, taskStep, ...
+
+    @Bean("taskletJob")
+    public Job taskletJob(JobBuilderFactory jobBuilderFactory,
+                          StepBuilderFactory stepBuilderFactory,
+                          UserRepository userRepository){
+
+                Step taskletstep = stepBuilderFactory.get("ETL-file-cleanup")
+                        .tasklet(cleaningStep(userRepository))
+                        .build();
+
+                return jobBuilderFactory.get("ETL-file-cleanup")
+                        .incrementer(new RunIdIncrementer())
+                        .start(taskletstep)
+                        .build();
+    }
+
     @Bean
-    public Job job(JobBuilderFactory jobBuilderFactory,
-                   StepBuilderFactory stepBuilderFactory,
-                   ItemReader<UserManagement> itemReader,
-                   ItemProcessor<UserManagement, UserManagement> itemProcessor,
-                   ItemWriter<UserManagement> itemWriter){
-
-        Step step = stepBuilderFactory.get("ETL-file-load")
-                .<UserManagement, UserManagement>chunk(100)
-                .reader(itemReader)
-                .processor(itemProcessor)
-                .writer(itemWriter)
-                .build();
-
-        return jobBuilderFactory.get("ETL-Load")
-                .incrementer(new RunIdIncrementer())
-                .start(step)
-                .build();
+    public Tasklet cleaningStep(UserRepository userRepository) {
+        return new DataCleanup(userRepository);
     }
 
     @Bean
@@ -71,6 +100,4 @@ public class SpringBatchConfig {
 
         return defaultLineMapper;
     }
-
-
 }
