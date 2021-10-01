@@ -23,11 +23,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @EnableBatchProcessing
 public class SpringBatchConfig {
 
+//    @Bean
+//    public ThreadPoolTaskExecutor taskExecutor()
+//    {
+//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//        executor.setCorePoolSize(3);
+//        executor.setMaxPoolSize(5);
+//        return executor;
+//    }
 
     @Bean("chunkJob")
     @Primary
@@ -44,7 +53,7 @@ public class SpringBatchConfig {
                         .writer(itemWriter)
                         .build();
 
-                return jobBuilderFactory.get("ETL-Load")
+                return jobBuilderFactory.get("ETL-file-load")
                         .incrementer(new RunIdIncrementer())
                         .start(chunkstep)
                         .build();

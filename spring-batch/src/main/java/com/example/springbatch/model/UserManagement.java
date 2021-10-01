@@ -14,13 +14,15 @@ public class UserManagement {
     private String departments;
     private String salary;
     private Date time;
+    private String executor;
 
-    public UserManagement(Integer id, String name, String departments, String salary, Date time) {
+    public UserManagement(Integer id, String name, String departments, String salary, Date time, String executor) {
         this.id = id;
         this.name = name;
         this.departments = departments;
         this.salary = salary;
         this.time = time;
+        this.executor =executor;
     }
 
     public UserManagement() {
@@ -64,6 +66,14 @@ public class UserManagement {
 
     public void setTime(Date time) {
         this.time = time;
+    }
+
+    public String getExecutor() {
+        return executor;
+    }
+
+    public void setExecutor(String executor) {
+        this.executor = executor;
     }
 
     @Override
