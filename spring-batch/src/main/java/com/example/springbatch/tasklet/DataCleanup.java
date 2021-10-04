@@ -20,6 +20,13 @@ public class DataCleanup implements Tasklet {
         this.userRepository = userRepository;
     }
 
+    /**
+     *
+     * @param stepContribution
+     * @param chunkContext
+     * @return
+     * @throws Exception
+     */
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         //try catch (return status)

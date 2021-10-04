@@ -13,6 +13,13 @@ public class ApiException {
     private final String message;
     private final ZonedDateTime dateTime;
 
+    /**
+     *
+     * @param errorCode
+     * @param httpStatus
+     * @param message
+     * @param dateTime
+     */
     public ApiException(Integer errorCode,
                         HttpStatus httpStatus,
                         String message,

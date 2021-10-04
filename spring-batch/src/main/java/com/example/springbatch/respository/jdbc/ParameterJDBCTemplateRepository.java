@@ -15,6 +15,11 @@ public class ParameterJDBCTemplateRepository extends JDBCTemplateRepository {
     @Autowired
     private NamedParameterJdbcTemplate parameterJdbcTemplate;
 
+    /**
+     *
+     * @param user
+     * @return
+     */
     @Override
     public int update(UserManagement user) {
         return parameterJdbcTemplate.update(
@@ -26,6 +31,11 @@ public class ParameterJDBCTemplateRepository extends JDBCTemplateRepository {
                 new BeanPropertySqlParameterSource(user));
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     @Override
     public Optional<UserManagement> findById(Integer id) {
         return parameterJdbcTemplate.queryForObject(

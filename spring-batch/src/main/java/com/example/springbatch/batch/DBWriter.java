@@ -17,6 +17,11 @@ public class DBWriter implements ItemWriter<UserManagement> {
     @Qualifier("JDBCTemplateRepository")
     JDBCRepository repository;
 
+    /**
+     *
+     * @param users
+     * @throws Exception
+     */
     @Override
     public void write(List<? extends UserManagement> users) throws Exception {
 

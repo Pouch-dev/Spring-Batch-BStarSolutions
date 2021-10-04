@@ -23,10 +23,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.concurrent.Executor;
+
 
 @Configuration
 @EnableBatchProcessing
+@EnableAsync
 public class SpringBatchConfig {
 
 //    @Bean
@@ -38,6 +45,20 @@ public class SpringBatchConfig {
 //        return executor;
 //    }
 
+//    @Bean
+//    public TaskExecutor taskExecutor() {
+//        return new SimpleAsyncTaskExecutor("spring_batch");
+//    }
+
+    /**
+     *
+     * @param jobBuilderFactory
+     * @param stepBuilderFactory
+     * @param itemReader
+     * @param itemProcessor
+     * @param itemWriter
+     * @return
+     */
     @Bean("chunkJob")
     @Primary
     public Job chunkJob(JobBuilderFactory jobBuilderFactory,
@@ -51,16 +72,26 @@ public class SpringBatchConfig {
                         .reader(itemReader)
                         .processor(itemProcessor)
                         .writer(itemWriter)
+                        .taskExecutor((TaskExecutor) taskExecutor())
+                        .throttleLimit(10)
                         .build();
 
                 return jobBuilderFactory.get("ETL-file-load")
                         .incrementer(new RunIdIncrementer())
                         .start(chunkstep)
+
                         .build();
     }
 
-    //learn all step -> chunkStep, taskStep, ...
 
+
+    /**
+     *
+     * @param jobBuilderFactory
+     * @param stepBuilderFactory
+     * @param userRepository
+     * @return
+     */
     @Bean("taskletJob")
     public Job taskletJob(JobBuilderFactory jobBuilderFactory,
                           StepBuilderFactory stepBuilderFactory,
@@ -76,11 +107,20 @@ public class SpringBatchConfig {
                         .build();
     }
 
+    /**
+     *
+     * @param userRepository
+     * @return
+     */
     @Bean
     public Tasklet cleaningStep(UserRepository userRepository) {
         return new DataCleanup(userRepository);
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public FlatFileItemReader<UserManagement> itemReader(){
 
@@ -92,6 +132,10 @@ public class SpringBatchConfig {
         return flatFileItemReader;
     }
 
+    /**
+     *
+     * @return
+     */
     @Bean
     public LineMapper<UserManagement> lineMapper() {
         DefaultLineMapper<UserManagement> defaultLineMapper = new DefaultLineMapper<>();
@@ -108,5 +152,16 @@ public class SpringBatchConfig {
         defaultLineMapper.setFieldSetMapper(fieldSetMapper);
 
         return defaultLineMapper;
+    }
+
+    @Bean("taskExecutor")
+    public Executor taskExecutor(){
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(3);
+        executor.setMaxPoolSize(3);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("userThread- ");
+        executor.initialize();
+        return executor;
     }
 }

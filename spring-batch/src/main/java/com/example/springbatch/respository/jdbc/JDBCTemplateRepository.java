@@ -14,6 +14,11 @@ public class JDBCTemplateRepository implements JDBCRepository {
 
     @Autowired private JdbcTemplate jdbcTemplate;
 
+    /**
+     *
+     * @param user
+     * @return
+     */
     @Override
     public int save(UserManagement user) {
         return jdbcTemplate
@@ -21,6 +26,11 @@ public class JDBCTemplateRepository implements JDBCRepository {
                 user.getDepartments(),user.getName(),user.getSalary(),user.getTime(),user.getExecutor());
     }
 
+    /**
+     *
+     * @param user
+     * @return
+     */
     @Override
     public int update(UserManagement user) {
         return jdbcTemplate.update(
@@ -28,12 +38,21 @@ public class JDBCTemplateRepository implements JDBCRepository {
                 user.getDepartments(),user.getName(),user.getSalary());
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     */
     @Override
     public int deleteById(Integer id) {
         return jdbcTemplate.update(
                 "delete user_management where id = ?", id);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public List<UserManagement> findAll() {
         return jdbcTemplate.query(
@@ -48,6 +67,11 @@ public class JDBCTemplateRepository implements JDBCRepository {
         );
     }
 
+    /**
+     * 
+     * @param id
+     * @return
+     */
     @Override
     public Optional<UserManagement> findById(Integer id) {
         return jdbcTemplate.queryForObject(

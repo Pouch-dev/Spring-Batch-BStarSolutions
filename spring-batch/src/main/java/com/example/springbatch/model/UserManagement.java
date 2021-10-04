@@ -16,6 +16,15 @@ public class UserManagement {
     private Date time;
     private String executor;
 
+    /**
+     *
+     * @param id
+     * @param name
+     * @param departments
+     * @param salary
+     * @param time
+     * @param executor
+     */
     public UserManagement(Integer id, String name, String departments, String salary, Date time, String executor) {
         this.id = id;
         this.name = name;
